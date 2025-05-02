@@ -145,10 +145,10 @@ cafe-companion/
 
 ## Team Members
 
-- [Your Name] - [Your Role]
-- [Team Member 2] - [Role]
-- [Team Member 3] - [Role]
-- [Team Member 4] - [Role]
+- Elvi Zekaj
+- Aldin Zendeli
+- Guido Andreini
+- Lorenzo Agnello
 
 ## Judging Criteria
 
