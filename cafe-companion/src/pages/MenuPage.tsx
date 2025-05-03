@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { coffeeOptions, CoffeeOption } from '../data/coffeeData';
 import CoffeeCard from '../components/CoffeeCard';
 import RecommendationSection from '../components/RecommendationSection';
+import { useCart } from '../context/CartContext';
 import {
   getPersonalizedRecommendations,
   getRelatedRecommendations,
@@ -9,11 +10,13 @@ import {
 } from '../utils/recommendationEngine';
 
 const MenuPage = () => {
+  const { addToCart } = useCart();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedCoffee, setSelectedCoffee] = useState<CoffeeOption | null>(null);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<CoffeeOption[]>([]);
   const [relatedRecommendations, setRelatedRecommendations] = useState<CoffeeOption[]>([]);
   const [viewedCoffees, setViewedCoffees] = useState<string[]>([]);
+  const [selectedCustomizations, setSelectedCustomizations] = useState<{[key: string]: string}>({});
 
   // Get unique categories
   const categories = Array.from(new Set(coffeeOptions.map(coffee => coffee.category)));
@@ -67,6 +70,32 @@ const MenuPage = () => {
 
   const handleCloseModal = () => {
     setSelectedCoffee(null);
+    setSelectedCustomizations({});
+  };
+
+  // Handle customization selection
+  const handleCustomizationChange = (optionName: string, value: string) => {
+    setSelectedCustomizations(prev => ({
+      ...prev,
+      [optionName]: value
+    }));
+  };
+
+  // Add the selected coffee to cart
+  const handleAddToCart = () => {
+    if (selectedCoffee) {
+      addToCart(
+        selectedCoffee,
+        1,
+        Object.keys(selectedCustomizations).length > 0 ? selectedCustomizations : undefined
+      );
+
+      // Show success message
+      alert(`${selectedCoffee.name} added to cart!`);
+
+      // Close the modal
+      handleCloseModal();
+    }
   };
 
   return (
@@ -187,6 +216,8 @@ const MenuPage = () => {
                               type="radio"
                               name={optionName}
                               value={value}
+                              checked={selectedCustomizations[optionName] === value}
+                              onChange={() => handleCustomizationChange(optionName, value)}
                               className="mr-2"
                             />
                             {value}
@@ -199,12 +230,18 @@ const MenuPage = () => {
               )}
 
               <div className="flex gap-4">
-                <button className="flex-1 bg-primary text-white py-3 rounded-md font-medium hover:bg-accent transition-colors">
-                  Add to Order
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-primary text-white py-3 rounded-md font-medium hover:bg-accent transition-colors"
+                >
+                  Add to Cart
                 </button>
 
-                <button className="flex-1 border border-primary text-primary py-3 rounded-md font-medium hover:bg-primary/5 transition-colors">
-                  Customize More
+                <button
+                  onClick={handleCloseModal}
+                  className="flex-1 border border-primary text-primary py-3 rounded-md font-medium hover:bg-primary/5 transition-colors"
+                >
+                  Cancel
                 </button>
               </div>
 

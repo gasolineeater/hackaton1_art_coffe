@@ -12,26 +12,31 @@ import LoyaltyPage from './pages/LoyaltyPage';
 import GiftCardPage from './pages/GiftCardPage';
 import ScanOrderPage from './pages/ScanOrderPage';
 
+// Context
+import { CartProvider } from './context/CartContext';
+
 function App() {
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen bg-background">
-        <Navbar />
+    <CartProvider>
+      <Router>
+        <div className="flex flex-col min-h-screen bg-background">
+          <Navbar />
 
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/menu" element={<MenuPage />} />
-            <Route path="/custom-order" element={<CustomOrderPage />} />
-            <Route path="/loyalty" element={<LoyaltyPage />} />
-            <Route path="/gift-cards" element={<GiftCardPage />} />
-            <Route path="/scan" element={<ScanOrderPage />} />
-          </Routes>
-        </main>
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/menu" element={<MenuPage />} />
+              <Route path="/custom-order" element={<CustomOrderPage />} />
+              <Route path="/loyalty" element={<LoyaltyPage />} />
+              <Route path="/gift-cards" element={<GiftCardPage />} />
+              <Route path="/scan" element={<ScanOrderPage />} />
+            </Routes>
+          </main>
 
-        <Footer />
-      </div>
-    </Router>
+          <Footer />
+        </div>
+      </Router>
+    </CartProvider>
   );
 }
 

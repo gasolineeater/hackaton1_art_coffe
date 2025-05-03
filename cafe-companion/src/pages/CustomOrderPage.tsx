@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { coffeeOptions, CoffeeOption } from '../data/coffeeData';
 import { getPersonalizedRecommendations, mockUserPreference } from '../utils/recommendationEngine';
+import { useCart } from '../context/CartContext';
 
 interface CustomizationOption {
   name: string;
@@ -13,6 +14,7 @@ interface CustomizedCoffee {
 }
 
 const CustomOrderPage = () => {
+  const { addToCart } = useCart();
   const [selectedCoffee, setSelectedCoffee] = useState<CoffeeOption | null>(null);
   const [customizationStep, setCustomizationStep] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<CustomizationOption[]>([]);
@@ -148,9 +150,26 @@ const CustomOrderPage = () => {
     return customizedCoffees.reduce((total, item) => total + item.base.price, 0);
   };
 
+  // Convert customization options to the format expected by the cart
+  const convertOptionsToCartFormat = (options: CustomizationOption[]): { [key: string]: string } => {
+    const result: { [key: string]: string } = {};
+    options.forEach(option => {
+      result[option.name] = option.value;
+    });
+    return result;
+  };
+
   const handlePlaceOrder = () => {
-    // In a real app, this would send the order to a backend
-    alert('Your custom order has been placed!');
+    // Add all customized coffees to the cart
+    customizedCoffees.forEach(customizedCoffee => {
+      const customizations = convertOptionsToCartFormat(customizedCoffee.options);
+      addToCart(customizedCoffee.base, 1, customizations);
+    });
+
+    // Show success message
+    alert('All items added to cart!');
+
+    // Clear the custom order
     setCustomizedCoffees([]);
   };
 
@@ -376,7 +395,7 @@ const CustomOrderPage = () => {
                   onClick={handlePlaceOrder}
                   className="w-full py-3 bg-primary text-white rounded-md font-medium hover:bg-accent"
                 >
-                  Place Order
+                  Add All to Cart
                 </button>
               </div>
             )}

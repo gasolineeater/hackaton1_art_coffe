@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { coffeeOptions, CoffeeOption } from '../data/coffeeData';
+import { useCart } from '../context/CartContext';
 
 const ScanOrderPage = () => {
+  const { addToCart } = useCart();
   const [tableNumber, setTableNumber] = useState<string>('');
   const [isScanning, setIsScanning] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
-  const [cart, setCart] = useState<{ item: CoffeeOption; quantity: number }[]>([]);
+  const [localCart, setLocalCart] = useState<{ item: CoffeeOption; quantity: number }[]>([]);
   const [orderPlaced, setOrderPlaced] = useState(false);
-  
+  const [specialInstructions, setSpecialInstructions] = useState<string>('');
+
   // Mock function to simulate QR code scanning
   const handleScan = () => {
     setIsScanning(true);
-    
+
     // Simulate scanning delay
     setTimeout(() => {
       setIsScanning(false);
@@ -19,26 +22,26 @@ const ScanOrderPage = () => {
       setTableNumber('12'); // Mock table number from QR code
     }, 2000);
   };
-  
+
   const handleAddToCart = (coffee: CoffeeOption) => {
-    const existingItemIndex = cart.findIndex(item => item.item.id === coffee.id);
-    
+    const existingItemIndex = localCart.findIndex(item => item.item.id === coffee.id);
+
     if (existingItemIndex >= 0) {
       // Item already in cart, increase quantity
-      const updatedCart = [...cart];
+      const updatedCart = [...localCart];
       updatedCart[existingItemIndex].quantity += 1;
-      setCart(updatedCart);
+      setLocalCart(updatedCart);
     } else {
       // Add new item to cart
-      setCart([...cart, { item: coffee, quantity: 1 }]);
+      setLocalCart([...localCart, { item: coffee, quantity: 1 }]);
     }
   };
-  
+
   const handleRemoveFromCart = (coffeeId: string) => {
-    const existingItemIndex = cart.findIndex(item => item.item.id === coffeeId);
-    
+    const existingItemIndex = localCart.findIndex(item => item.item.id === coffeeId);
+
     if (existingItemIndex >= 0) {
-      const updatedCart = [...cart];
+      const updatedCart = [...localCart];
       if (updatedCart[existingItemIndex].quantity > 1) {
         // Decrease quantity
         updatedCart[existingItemIndex].quantity -= 1;
@@ -46,30 +49,42 @@ const ScanOrderPage = () => {
         // Remove item from cart
         updatedCart.splice(existingItemIndex, 1);
       }
-      setCart(updatedCart);
+      setLocalCart(updatedCart);
     }
   };
-  
+
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + (item.item.price * item.quantity), 0);
+    return localCart.reduce((total, item) => total + (item.item.price * item.quantity), 0);
   };
-  
+
   const handlePlaceOrder = () => {
-    // In a real app, this would send the order to a backend
+    // Add all items to the global cart
+    localCart.forEach(item => {
+      // Add table number as a special instruction
+      const tableInfo = `Table #${tableNumber}`;
+      const instructions = specialInstructions
+        ? `${tableInfo} - ${specialInstructions}`
+        : tableInfo;
+
+      addToCart(item.item, item.quantity, undefined, instructions);
+    });
+
+    // Show order confirmation
     setOrderPlaced(true);
   };
-  
+
   const handleNewOrder = () => {
-    setCart([]);
+    setLocalCart([]);
     setOrderPlaced(false);
     setIsScanned(false);
     setTableNumber('');
+    setSpecialInstructions('');
   };
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Scan & Order</h1>
-      
+
       {!isScanned ? (
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 text-center">
           <h2 className="text-xl font-semibold mb-4">Scan QR Code at Your Table</h2>
@@ -77,7 +92,7 @@ const ScanOrderPage = () => {
             Scan the QR code on your table to place an order directly from your seat.
             No need to wait in line!
           </p>
-          
+
           <div className="mb-6">
             {isScanning ? (
               <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -97,23 +112,23 @@ const ScanOrderPage = () => {
               </div>
             )}
           </div>
-          
+
           <button
             onClick={handleScan}
             disabled={isScanning}
             className={`w-full py-3 rounded-md font-medium ${
-              isScanning 
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+              isScanning
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-primary text-white hover:bg-accent'
             }`}
           >
             {isScanning ? 'Scanning...' : 'Scan QR Code'}
           </button>
-          
+
           <p className="mt-4 text-sm text-gray-500">
             Or enter your table number manually:
           </p>
-          
+
           <div className="mt-2 flex">
             <input
               type="text"
@@ -126,8 +141,8 @@ const ScanOrderPage = () => {
               onClick={() => setIsScanned(true)}
               disabled={!tableNumber}
               className={`px-4 py-2 rounded-r-md ${
-                tableNumber 
-                  ? 'bg-primary text-white hover:bg-accent' 
+                tableNumber
+                  ? 'bg-primary text-white hover:bg-accent'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
@@ -147,14 +162,14 @@ const ScanOrderPage = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
                   <h2 className="text-xl font-semibold mb-4">Menu</h2>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {coffeeOptions.map(coffee => (
-                      <div 
+                      <div
                         key={coffee.id}
                         className="bg-white rounded-lg shadow-md overflow-hidden flex"
                       >
@@ -176,25 +191,25 @@ const ScanOrderPage = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="bg-white rounded-lg shadow-md p-4 sticky top-4">
                     <h2 className="text-xl font-semibold mb-4">Your Order</h2>
-                    
-                    {cart.length === 0 ? (
+
+                    {localCart.length === 0 ? (
                       <p className="text-gray-500 text-center py-6">
                         Your order is empty. Add items from the menu.
                       </p>
                     ) : (
                       <div>
                         <div className="space-y-3 mb-4">
-                          {cart.map((item) => (
+                          {localCart.map((item) => (
                             <div key={item.item.id} className="flex justify-between items-center">
                               <div>
                                 <h4 className="font-medium">{item.item.name}</h4>
                                 <p className="text-sm text-gray-500">${item.item.price.toFixed(2)} each</p>
                               </div>
-                              
+
                               <div className="flex items-center">
                                 <button
                                   onClick={() => handleRemoveFromCart(item.item.id)}
@@ -213,19 +228,32 @@ const ScanOrderPage = () => {
                             </div>
                           ))}
                         </div>
-                        
-                        <div className="border-t border-gray-200 pt-4 mb-4">
+
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Special Instructions
+                          </label>
+                          <textarea
+                            value={specialInstructions}
+                            onChange={(e) => setSpecialInstructions(e.target.value)}
+                            placeholder="Any special requests for your order?"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                            rows={2}
+                          />
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-4 mt-4 mb-4">
                           <div className="flex justify-between font-bold">
                             <span>Total:</span>
                             <span>${calculateTotal().toFixed(2)}</span>
                           </div>
                         </div>
-                        
+
                         <button
                           onClick={handlePlaceOrder}
                           className="w-full py-3 bg-primary text-white rounded-md font-medium hover:bg-accent"
                         >
-                          Place Order
+                          Add to Cart
                         </button>
                       </div>
                     )}
@@ -240,10 +268,10 @@ const ScanOrderPage = () => {
               <p className="text-gray-600 mb-6">
                 Your order has been sent to the kitchen. We'll bring it to Table #{tableNumber} shortly.
               </p>
-              
+
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h3 className="font-semibold mb-2">Order Summary</h3>
-                {cart.map((item) => (
+                {localCart.map((item) => (
                   <div key={item.item.id} className="flex justify-between text-sm mb-1">
                     <span>{item.quantity}x {item.item.name}</span>
                     <span>${(item.item.price * item.quantity).toFixed(2)}</span>
@@ -254,7 +282,7 @@ const ScanOrderPage = () => {
                   <span>${calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
-              
+
               <button
                 onClick={handleNewOrder}
                 className="px-6 py-2 bg-primary text-white rounded-md font-medium hover:bg-accent"
