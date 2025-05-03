@@ -33,6 +33,17 @@ Our app aims to implement the following key features:
    - View menu and place orders directly
    - No waiting in line required
 
+5. **🛒 Shopping Cart**
+   - Add items from any page in the application
+   - Customize orders before adding to cart
+   - View detailed cost breakdown including tax
+   - Modify quantities or remove items
+
+6. **🤖 AI-based Recommendations**
+   - Get personalized coffee recommendations based on preferences
+   - "Customers who liked this also tried..." suggestions
+   - Recommendations adapt based on browsing and order history
+
 ## Technical Stack
 
 - **Frontend**: React with TypeScript
