@@ -50,7 +50,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-      <div 
+      <div
         ref={drawerRef}
         className={`bg-white w-full max-w-md h-full transform transition-transform duration-300 ease-in-out ${
           isClosing ? 'translate-x-full' : 'translate-x-0'
@@ -60,20 +60,20 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           {/* Header */}
           <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-primary text-white">
             <h2 className="text-xl font-semibold">Your Cart</h2>
-            <button 
+            <button
               onClick={handleClose}
               className="text-white hover:text-gray-200"
             >
               ✕
             </button>
           </div>
-          
+
           {/* Cart Items */}
           <div className="flex-grow overflow-y-auto p-4">
             {items.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500">Your cart is empty</p>
-                <button 
+                <button
                   onClick={handleClose}
                   className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-accent"
                 >
@@ -88,7 +88,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                       <div className="flex-1">
                         <h3 className="font-medium">{item.coffee.name}</h3>
                         <p className="text-sm text-gray-500">${item.coffee.price.toFixed(2)} each</p>
-                        
+
                         {/* Customizations */}
                         {item.customizations && Object.keys(item.customizations).length > 0 && (
                           <div className="mt-1">
@@ -100,7 +100,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                             </ul>
                           </div>
                         )}
-                        
+
                         {/* Special Instructions */}
                         {item.specialInstructions && (
                           <p className="text-xs text-gray-500 mt-1">
@@ -108,15 +108,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                           </p>
                         )}
                       </div>
-                      
+
                       <div className="flex flex-col items-end">
-                        <button 
+                        <button
                           onClick={() => removeFromCart(item.id)}
                           className="text-gray-400 hover:text-gray-600 text-sm"
                         >
                           ✕
                         </button>
-                        
+
                         <div className="flex items-center mt-2">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -132,7 +132,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                             +
                           </button>
                         </div>
-                        
+
                         <p className="text-accent font-bold mt-2">
                           ${(item.coffee.price * item.quantity).toFixed(2)}
                         </p>
@@ -143,15 +143,27 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               </div>
             )}
           </div>
-          
+
           {/* Footer */}
           {items.length > 0 && (
             <div className="border-t border-gray-200 p-4">
-              <div className="flex justify-between mb-4">
-                <span className="font-medium">Subtotal:</span>
-                <span className="font-bold">${getCartTotal().toFixed(2)}</span>
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between">
+                  <span className="font-medium">Subtotal:</span>
+                  <span className="font-bold">${getCartTotal().toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Tax (8%):</span>
+                  <span>${(getCartTotal() * 0.08).toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 mt-2">
+                  <span>Total:</span>
+                  <span>${(getCartTotal() * 1.08).toFixed(2)}</span>
+                </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <button
                   onClick={clearCart}
@@ -159,7 +171,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 >
                   Clear Cart
                 </button>
-                
+
                 <button
                   onClick={() => alert('Proceeding to checkout!')}
                   className="px-4 py-2 bg-primary text-white rounded-md hover:bg-accent flex-1"
